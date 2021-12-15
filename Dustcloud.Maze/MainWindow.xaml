@@ -1,0 +1,379 @@
+﻿<Window x:Class="Dustcloud.Maze.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Dustcloud.Maze.ViewModels"
+        xmlns:controls="clr-namespace:Dustcloud.Maze.Controls"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:converters="clr-namespace:Dustcloud.Maze.Converters"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="768" Width="800"
+        d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:BreadCrumbsToPlanConverter x:Key="BreadCrumbsToPlanConverter" />
+        <converters:DirectionToArrowConverter x:Key="DirectionToArrowConverter" />
+        <DataTemplate DataType="{x:Type viewModels:TileViewModel}"
+                      x:Key="WallTemplate">
+            <Rectangle Fill="Black"
+                       Height="Auto"
+                       VerticalAlignment="Stretch"
+                       HorizontalAlignment="Stretch"
+                       Width="Auto"/>
+        </DataTemplate>
+        <DataTemplate x:Key="EmptyTileTemplate"
+                      DataType="{x:Type viewModels:TileViewModel}">
+            <Grid VerticalAlignment="Stretch"
+                  HorizontalAlignment="Stretch">
+                <Rectangle Stroke="Black"
+                       StrokeThickness="1"
+                       Height="Auto"
+                       VerticalAlignment="Stretch"
+                       HorizontalAlignment="Stretch"
+                       Width="Auto"/>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="StartTileTemplate"
+                      DataType="{x:Type viewModels:TileViewModel}">
+            <Grid HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch">
+                <Rectangle Fill="Green"
+                       StrokeThickness="1"
+                       Height="Auto"
+                       Width="Auto"/>
+                <TextBlock Text="Start"
+                           HorizontalAlignment="Center"
+                           Foreground="White"
+                           VerticalAlignment="Top"/>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="FinishTileTemplate"
+                      DataType="{x:Type viewModels:TileViewModel}">
+            <Grid>
+                <Rectangle Fill="Blue"
+                       StrokeThickness="1"
+                       Height="Auto"
+                       Width="Auto"/>
+                <TextBlock VerticalAlignment="Top" 
+                           HorizontalAlignment="Center"
+                           Text="Exit"
+                           Foreground="White"
+                           FontSize="12">
+
+                </TextBlock>
+            </Grid>
+        </DataTemplate>
+        <controls:TileTypeSelector x:Key="TileTypeSelector" 
+                                   EmptyTileTemplate="{StaticResource EmptyTileTemplate}"
+                                   WallTemplate="{StaticResource WallTemplate}"
+                                   StartTemplate="{StaticResource StartTileTemplate}"
+                                   FinishTemplate="{StaticResource FinishTileTemplate}"/>
+        
+        
+
+    </Window.Resources>
+    <Grid>
+        <Grid.InputBindings>
+            <KeyBinding Command="{Binding MoveForwardCommand}"
+                            Key="Up" />
+            <KeyBinding Command="{Binding TurnCommand}"
+                        CommandParameter="90"
+                        Key="Right" />
+            <KeyBinding Command="{Binding TurnCommand}"
+                        CommandParameter="-90"
+                        Key="Left" />
+        </Grid.InputBindings>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" Grid.ColumnSpan="2">
+            <MenuItem Header="File">
+                <MenuItem Header="New" Command="{Binding NewFileCommand}"/>
+                <MenuItem Header="Load" Click="Button_Click"
+                          Command="{Binding LoadDataCommand}" />
+                <MenuItem Header="Save As" Command="{Binding SaveAsDataCommand}"/>
+                <MenuItem Header="Quit" Command="{Binding CloseAppCommand}"/>
+            </MenuItem>
+        </Menu>
+        <TabControl Grid.Row="1">
+            <TabItem Header="Data">
+                <StackPanel>
+                    <GroupBox Header="Loaded File"
+                              Visibility="{Binding IsFileLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBox x:Name="FilePathTextBox" 
+                             Text="{Binding FilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </GroupBox>
+                    <GroupBox Header="New Data"
+                              Visibility="{Binding IsNewFile, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="50"/>
+                            </Grid.RowDefinitions>
+                            <TextBox Text="{Binding MazeEdit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     FontFamily="Courier New"
+                                     Height="300"
+                                     AcceptsReturn="True"/>
+                            <Button Content="Validate and parse"
+                                    Grid.Row="1"
+                                    Command="{Binding ValidateAndParseDataCommand}"/>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Data">
+                        <Grid Margin="5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal"
+                                        Grid.Row="0"
+                                        Margin="5">
+                                <TextBlock Text="Number of walls:" 
+                                           Margin="5"/>
+                                <TextBlock Text="{Binding NumberOfWalls}" 
+                                           Margin="5"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        Grid.Row="1"
+                                        Margin="5"
+                                        >
+                                <TextBlock Text="Number of Empty Spaces:" Margin="5"/>
+                                <TextBlock Text="{Binding NumberOfEmpties}" Margin="5"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        Grid.Row="2"
+                                        Margin="5">
+                                <TextBlock Text="Coord X" Margin="5"/>
+                                <TextBox Text="{Binding CoordX}" Width="50" Margin="5"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="5"
+                                        Grid.Row="3">
+                                <TextBlock Text="Coord Y" Margin="5" />
+                                <TextBox Text="{Binding CoordY}" Width="50" Margin="5"/>
+                               
+                            </StackPanel>
+                            <StackPanel Grid.Row="4" Margin="5">
+                                <Button Command="{Binding CheckCoordsCommand}"
+                                        Width="100"
+                                        HorizontalAlignment="Left"
+                                        Content="Check Coords"/>
+                                <TextBlock Text="{Binding CoordExplanation}" />
+                            </StackPanel>
+                            
+                        </Grid>
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Manual">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <GroupBox Header="Explorer Data">
+                        <StackPanel>
+                            <TextBlock Text="Current Position" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding HeroViewModel.X, StringFormat=X: {0}}"/>
+                                <TextBlock Text="{Binding HeroViewModel.Y, StringFormat=Y: {0}}"/>
+                                <TextBlock Text="{Binding HeroViewModel.Direction, StringFormat=Direction: {0}}"/>
+                            </StackPanel>
+                            <Button Content="Drop Explorer" Command="{Binding PlaceHeroCommand}" />
+
+                            <Button Command="{Binding MoveForwardCommand}"
+                                    Content="↑"
+                                    Height="30"
+                                    ToolTip="Move Forward"
+                                    Width="30"/>
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                            <Button Content="←" 
+                                    Height="30"
+                                    Width="30"
+                                    ToolTip="Turn left"
+                                    Command="{Binding TurnCommand}" 
+                                    CommandParameter="-90"/>
+                            <Button Content="→" 
+                                    Height="30"
+                                    Width="30"
+                                    ToolTip="Turn right"
+                                    Command="{Binding TurnCommand}" 
+                                    CommandParameter="90"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+                    <Grid Grid.Row="1">
+                        <GroupBox Header="Log Console"
+                              VerticalAlignment="Stretch">
+                            <TextBox IsReadOnly="True"
+                                 Text="{Binding HeroViewModel.MovementLog, Mode=OneWay}"
+                                 VerticalScrollBarVisibility="Auto"
+                                 VerticalAlignment="Stretch"
+                                 TextChanged="TextBoxBase_OnTextChanged"
+                                 Background="Black"
+                                 Foreground="Azure"
+                                 FontFamily="System"/>
+                        </GroupBox>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Automatic">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Button Grid.Column="1" Content="Find Automatic Route" 
+                            Command="{Binding FindAutomaticRouteCommand}"/> 
+                    <ProgressBar IsIndeterminate="true" 
+                                 Visibility="{Binding IsCalculating, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <ListBox ItemsSource="{Binding RoutesCollectionView}"
+                              Grid.Row="1"
+                              Background="Black"
+                              SelectedItem="{Binding SelectedRoute}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Foreground="White">
+                                        <Run Text="Route to finish in "/>
+                                        <Run Text="{Binding Length, Mode=OneWay}"
+                                             Foreground="Yellow"/>
+                                        <Run Text="moves"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBox Grid.Row="2" Background="Black"
+                             Foreground="Aqua"
+                             IsReadOnly="True"
+                             Text="{Binding SelectedRoute.OrderedBreadCrumbs, Mode=OneWay, Converter={StaticResource BreadCrumbsToPlanConverter}}"/>
+                </Grid>
+            </TabItem>
+
+
+        </TabControl>
+        <!--<ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding KeyChain}" TextWrapping="Wrap"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>-->
+        <!--SelectedItem="{Binding SelectedTile}"-->
+        <ItemsControl x:Name="UniGrid"
+                      Grid.Row="1"
+                      Grid.RowSpan="2"
+                      Grid.Column="1"
+                      ItemsSource="{Binding TileCollection}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid x:Name="ItemGrid" 
+                          VerticalAlignment="Stretch"
+                          HorizontalAlignment="Stretch">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" 
+                                             Value="True">
+                                        <Setter Property="Opacity" 
+                                                Value=".5"/>
+                                        <Setter Property="Background" 
+                                                Value="Gray"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="MouseDown" 
+                                            SourceObject="{Binding ElementName=ItemGrid}">
+                                <b:InvokeCommandAction Command="{Binding ElementName=UniGrid, Path=DataContext.ItemClickCommand}" 
+                                                       CommandParameter="{Binding}"/>
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                        <ContentControl Content="{Binding}" 
+                                    ContentTemplateSelector="{StaticResource TileTypeSelector}"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalAlignment="Stretch"/>
+                        <!--<TextBlock Text="{Binding X}"
+                                   FontSize="20"
+                                   VerticalAlignment="Top"
+                                   HorizontalAlignment="Left"
+                                   Foreground="Firebrick">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsOccupied}" 
+                                                     Value="True">
+                                            <Setter Property="Visibility" 
+                                                    Value="Visible"/>
+                                            <Setter Property="Foreground"
+                                                    Value="Blue"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="{Binding Y}"
+                                   FontSize="20"
+                                   VerticalAlignment="Top"
+                                   HorizontalAlignment="Right"
+                                   Foreground="Firebrick"/>-->
+                        <TextBlock Visibility="{Binding IsOccupied, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                   FontSize="45"
+                                   Text="{Binding ElementName=UniGrid, Path=DataContext.HeroViewModel.Direction, Converter={StaticResource DirectionToArrowConverter}}"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   Foreground="Firebrick"/>
+                        <TextBlock Text="!"
+                                   FontSize="40"
+                                   x:Name="ExclamationText"
+                                   Foreground="Yellow"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   Visibility="{Binding IsLitUp, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock.Triggers>
+                                <EventTrigger RoutedEvent="TextBlock.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation 
+                                                Storyboard.TargetName="ExclamationText"
+                                                Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+                                                From="Transparent" 
+                                                To="LimeGreen" 
+                                                Duration="0:0:.5"  
+                                                RepeatBehavior="Forever"
+                                                AutoReverse="True"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </TextBlock.Triggers>
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid IsItemsHost="True" 
+                                 Columns="{Binding Columns}"
+                                 Rows="{Binding Rows}" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+        
+    </Grid>
+
+</Window>
+
+    
+    

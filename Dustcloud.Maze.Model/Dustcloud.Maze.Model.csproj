@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dustcloud.IOC.Standard" Version="1.1.0" />
+    <PackageReference Include="ReactiveUI.WPF" Version="17.1.9" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+    <PackageReference Include="Prism.Core" Version="8.1.97" />
+    <PackageReference Include="ReactiveUI.WPF" Version="17.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dustcloud.Maze.Loader\Dustcloud.Maze.Loader.csproj" />
+    <ProjectReference Include="..\Dustcloud.Maze.Model\Dustcloud.Maze.Model.csproj" />
+  </ItemGroup>
+
+</Project>
