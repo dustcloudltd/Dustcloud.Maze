@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Dustcloud.Maze.Model;
+using Dustcloud.Maze.Model.Model;
 using Dustcloud.Maze.ViewModels;
 
 namespace Dustcloud.Maze.Controls

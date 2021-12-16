@@ -4,15 +4,13 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using Dustcloud.IOC.Attributes;
-using Dustcloud.Maze.Loader;
-using Dustcloud.Maze.Model;
-using Dustcloud.Maze.Model.Services;
+using Dustcloud.Maze.Model.Model;
+using Dustcloud.Maze.Services.Services;
 using Prism.Commands;
 
 namespace Dustcloud.Maze.ViewModels
@@ -20,16 +18,17 @@ namespace Dustcloud.Maze.ViewModels
     [DependencyConfiguration(typeof(IMainWindowViewModel), typeof(MainWindowViewModel), LifetimeManagerType.Singleton)]
     internal sealed class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
     {
-        private readonly ILoaderService _loaderService;
-        private readonly IBoardService _boardService;
+        private readonly IDataService _dataService;
+        private readonly IHeroService _heroService;
         private readonly IFindFinishService _findFinishService;
+        private readonly ISchedulerFactory _schedulerFactory;
 
         private ICommand _loadDataCommand;
-        private DelegateCommand<bool?> _checkCoordsCommand;
         private ICommand _itemClickCommand;
+        private DelegateCommand<bool?> _checkCoordsCommand;
         private DelegateCommand _validateAndParseDataCommand;
         private DelegateCommand _executePlaceExplorer;
-        private DelegateCommand _findAutomaticRouteCommand;
+        private DelegateCommand<string> _findAutomaticRouteCommand;
         private ICommand _newFileCommand;
         private IEnumerable<Tile> _neighbors;
 
@@ -48,6 +47,7 @@ namespace Dustcloud.Maze.ViewModels
         private bool _isFileLoaded;
         private bool _isNewFile;
         private ICommand _saveAsDataCommand;
+        private int _totalRoutesFound;
 
         public ObservableCollection<TileViewModel> TileCollection { get; } = new();
         public ObservableCollection<Route> Routes { get; } = new();
@@ -57,14 +57,16 @@ namespace Dustcloud.Maze.ViewModels
         public IHeroViewModel HeroViewModel { get; }
 
 
-        public MainWindowViewModel(ILoaderService loaderService,
-                                   IBoardService boardService,
+        public MainWindowViewModel(IDataService dataService,
+                                   IHeroService heroService,
                                    IFindFinishService findFinishService,
+                                   ISchedulerFactory schedulerFactory,
                                    IHeroViewModel heroViewModel)
         {
-            _loaderService = loaderService;
-            _boardService = boardService;
+            _dataService = dataService;
+            _heroService = heroService;
             _findFinishService = findFinishService;
+            _schedulerFactory = schedulerFactory;
             HeroViewModel = heroViewModel;
             
             PropertyChanged += OnPropertyChanged;
@@ -72,9 +74,9 @@ namespace Dustcloud.Maze.ViewModels
             
             RoutesCollectionView = new ListCollectionView(Routes);
             RoutesCollectionView.SortDescriptions
-                                .Add(new SortDescription(nameof(Route.Length), ListSortDirection.Ascending));
+                              .Add(new SortDescription(nameof(Route.Length), ListSortDirection.Ascending));
 
-            Subscribe();
+            SubscribeObservables();
         }
 
         private void TileCollectionOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -84,21 +86,57 @@ namespace Dustcloud.Maze.ViewModels
             CheckCoordsCommand.RaiseCanExecuteChanged();
         }
 
-        private void Subscribe()
+        private void SubscribeObservables()
         {
             Disposables.Add(_findFinishService.ObserveRoutes()
-                .SubscribeOn(Scheduler.TaskPool)
-                .ObserveOnDispatcher()
-                .Subscribe(onNext: route =>
-                    {
-                        Routes.Add(route);
-                    },
-                    onCompleted: () =>
-                    {
-                        IsCalculating = false;
-                        _findFinishService.Redo();
-                        Subscribe();
-                    }));
+                .SubscribeOn(_schedulerFactory.DefaultScheduler)
+                .ObserveOn(_schedulerFactory.Dispatcher)
+                .Subscribe(AddRoute, OnError));
+
+            Disposables.Add(_findFinishService.ObserveSingleRoute()
+                .Take(2)
+                .SubscribeOn(_schedulerFactory.DefaultScheduler)
+                .ObserveOn(_schedulerFactory.Dispatcher)
+                .Subscribe(onNext: AddRoute, OnError));
+
+            Disposables.Add(_findFinishService.ObserveReset()
+                .SubscribeOn(_schedulerFactory.DefaultScheduler)
+                .ObserveOn(_schedulerFactory.Dispatcher)
+                .Subscribe(OnResetReceived));
+
+        }
+
+        private void OnError(Exception exception)
+        {
+            IsCalculating = false;
+            FindAutomaticRouteCommand.RaiseCanExecuteChanged();
+        }
+
+        private void AddRoute(Route route)
+        {
+            Routes.Add(route);
+            TotalRoutesFound++;
+        }
+
+        private void OnResetReceived(bool isReset)
+        {
+            if (isReset)
+            {
+                IsCalculating = false;
+                FindAutomaticRouteCommand.RaiseCanExecuteChanged();
+                return;
+            }
+        }
+
+        public int TotalRoutesFound
+        {
+            get => _totalRoutesFound;
+            set
+            {
+                if (value == _totalRoutesFound) return;
+                _totalRoutesFound = value;
+                OnPropertyChanged();
+            }
         }
 
         public int NumberOfWalls
@@ -129,7 +167,6 @@ namespace Dustcloud.Maze.ViewModels
         public DelegateCommand PlaceHeroCommand
         {
             get { return _executePlaceExplorer ??= new DelegateCommand(ExecutePlaceExplorer, CanExecutePlaceExplorer); }
-
         }
 
         public ICommand ItemClickCommand
@@ -143,7 +180,12 @@ namespace Dustcloud.Maze.ViewModels
 
         public ICommand SaveAsDataCommand
         {
-            get { return _saveAsDataCommand ??= new DelegateCommand(ExecuteSaveData, () => IsNewFile); }
+            get 
+            {
+                return _saveAsDataCommand ??= new DelegateCommand(ExecuteSaveData, () => IsNewFile && 
+                                                                                                        !string.IsNullOrEmpty(MazeEdit) &&
+                                                                                                        TileCollection.Any());
+            }
         }
 
         public ICommand NewFileCommand
@@ -152,17 +194,17 @@ namespace Dustcloud.Maze.ViewModels
         }
 
 
-        public DelegateCommand FindAutomaticRouteCommand
+        public DelegateCommand<string> FindAutomaticRouteCommand
         {
             get
             {
-                return _findAutomaticRouteCommand ??= new DelegateCommand(ExecuteFindAutomaticRoute, CanExecuteFindAutomaticRoute);
+                return _findAutomaticRouteCommand ??= new DelegateCommand<string>(ExecuteFindAutomaticRoute, CanExecuteFindAutomaticRoute);
             }
         }
 
-        private bool CanExecuteFindAutomaticRoute()
+        private bool CanExecuteFindAutomaticRoute(string _)
         {
-            return TileCollection.Any();
+            return TileCollection.Any() && !IsCalculating;
         }
 
         public DelegateCommand MoveForwardCommand
@@ -304,9 +346,14 @@ namespace Dustcloud.Maze.ViewModels
             }
         }
 
-        private void ExecuteSaveData()
+        public ICommand ClosingCommand
         {
-            //Some logic here
+            get { return new DelegateCommand(Dispose); }
+        }
+
+        private async void ExecuteSaveData()
+        {
+            await _dataService.SaveAsync(FilePath, MazeEdit);
         }
 
         private void ExecuteNewFile()
@@ -340,11 +387,20 @@ namespace Dustcloud.Maze.ViewModels
 
         private void ExecutePlaceExplorer()
         {
+            ResetBoard();
             HeroViewModel.Hero = new Hero(TileCollection.Single(s => s.TileType == TileType.Start).Tile);
             HeroViewModel.Initialize();
-            _neighbors = _boardService.FindNonVisitedNeighbors(TileCollection.Select(s => s.Tile), HeroViewModel.Hero.OccupiedTile);
+            _neighbors = _heroService.FindNonVisitedNeighbors(TileCollection.Select(s => s.Tile), HeroViewModel.Hero.OccupiedTile);
             TurnCommand.RaiseCanExecuteChanged();
             MoveForwardCommand.RaiseCanExecuteChanged();
+        }
+
+        private void ResetBoard()
+        {
+            foreach (var tile in TileCollection.Select(s => s.Tile))
+            {
+                tile.HasBeenVisited = false;
+            }
         }
 
         private void ExecuteItemClick(TileViewModel tile)
@@ -373,22 +429,26 @@ namespace Dustcloud.Maze.ViewModels
         private bool CanExecuteMoveForward()
         {
             return HeroViewModel.Hero != null &&
-                   _boardService.CanMoveForward(HeroViewModel.Hero, _neighbors);
+                   _heroService.CanMoveForward(HeroViewModel.Hero, _neighbors);
         }
 
 
         private void ExecuteMoveForward()
         {
-            _neighbors = _boardService.MoveForward(TileCollection.Select(s => s.Tile).ToList(), HeroViewModel.Hero);
+            _neighbors = _heroService.MoveForward(TileCollection.Select(s => s.Tile).ToList(), HeroViewModel.Hero);
             
             var possibleMoves = string.Join(';', _neighbors.Select(s => $"({s.X}, {s.Y})"));
             HeroViewModel.MovementLogCollection.Add($"Possible moves: {possibleMoves}");
-            HeroViewModel.MoveForward();
+            var isFinished = HeroViewModel.CheckHeroState();
             foreach (var tileVm in TileCollection)
             {
                 tileVm.ResetOccupancy();
             }
             MoveForwardCommand.RaiseCanExecuteChanged();
+            if (isFinished)
+            {
+                
+            }
         }
 
         private void ExecuteCheckCoords(bool? toggleBack)
@@ -423,7 +483,7 @@ namespace Dustcloud.Maze.ViewModels
             TileCollection.Clear();
             HeroViewModel.Hero = null;
 
-            var tiles = await _loaderService.LoadDataFileAsync(FilePath);
+            var tiles = await _dataService.LoadDataFileAsync(FilePath);
            
             CreateTileCollection(tiles);
             IsNewFile = false;
@@ -445,16 +505,28 @@ namespace Dustcloud.Maze.ViewModels
         }
 
 
-        private void ExecuteFindAutomaticRoute()
+        private void ExecuteFindAutomaticRoute(string parameter)
         {
+            var findQuickest = false;
+            
+            if (!string.IsNullOrEmpty(parameter))
+            {
+                bool.TryParse(parameter, out findQuickest);
+            }
             var startTile = TileCollection.Single(s => s.TileType == TileType.Start).Tile;
+
+            ResetBoard();
+            HeroViewModel.Hero = new Hero(startTile);
+
+            TotalRoutesFound = 0;
             startTile.IsOccupied = true;
             Routes.Clear();
             IsCalculating = true;
+            FindAutomaticRouteCommand.RaiseCanExecuteChanged();
             Task.Run(() =>
             {
-                _findFinishService.GetRoutes(TileCollection.Select(s => s.Tile).ToList(),
-                    new List<Route>() { new Route(new List<Tile>() { startTile }) });
+                _findFinishService.FindAllRoutes(TileCollection.Select(s => s.Tile).ToList(),
+                    new List<Route>() { new Route(new List<Tile>() { startTile }) }, findQuickest);
             });
         }
 
@@ -466,7 +538,7 @@ namespace Dustcloud.Maze.ViewModels
 
         private void ExecuteValidateAndParseData()
         {
-            var tiles = _loaderService.LoadDataFromString(MazeEdit);
+            var tiles = _dataService.LoadDataFromString(MazeEdit);
             CreateTileCollection(tiles);
         }
 
@@ -475,7 +547,6 @@ namespace Dustcloud.Maze.ViewModels
             return !string.IsNullOrEmpty(MazeEdit);
         }
 
-
         private void ReleaseUnmanagedResources()
         {
             foreach (var disposable in Disposables)
@@ -483,6 +554,7 @@ namespace Dustcloud.Maze.ViewModels
                 disposable.Dispose();
             }
             PropertyChanged -= OnPropertyChanged;
+            HeroViewModel.Dispose();
         }
 
         public void Dispose()
@@ -496,25 +568,4 @@ namespace Dustcloud.Maze.ViewModels
             ReleaseUnmanagedResources();
         }
     }
-
-    //internal interface IViewModelFactory
-    //{
-    //    IHeroViewModel CreateNew();
-    //}
-
-    //[DependencyConfiguration(typeof(IViewModelFactory), typeof(ViewModelFactory), LifetimeManagerType.Singleton)]
-    //public class ViewModelFactory : IViewModelFactory
-    //{
-    //    private readonly IResolver _resolver;
-
-    //    public ViewModelFactory(IResolver resolver)
-    //    {
-    //        _resolver = resolver;
-    //    }
-
-    //    public IHeroViewModel CreateNew()
-    //    {
-    //        return _resolver.Resolve<IHeroViewModel>();
-    //    }
-    //}
 }

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Windows;
+using Dustcloud.IOC.Initializer;
 using Dustcloud.Maze.ViewModels;
 
 namespace Dustcloud.Maze
@@ -11,9 +12,8 @@ namespace Dustcloud.Maze
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-
             var assemblies = App.ResourceAssembly.GetReferencedAssemblies().Union(new[] { App.ResourceAssembly.GetName() }).ToArray();
-            var resolver = Dustcloud.IOC.Initializer.DependencyInitializer.Initialize(assemblies);
+            var resolver = DependencyInitializer.Initialize(assemblies);
 
             this.MainWindow = new MainWindow(){ DataContext = resolver.Resolve<IMainWindowViewModel>() };
             this.MainWindow.Show();

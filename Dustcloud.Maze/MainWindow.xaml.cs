@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 
@@ -28,6 +29,17 @@ namespace Dustcloud.Maze
         {
             var ofd = new OpenFileDialog();
             FilePathTextBox.Text = ofd.ShowDialog() == true ? ofd.FileName : null;
+        }
+
+        private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void SaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            var sfd = new SaveFileDialog();
+            FilePathTextBox.Text = sfd.ShowDialog() == true ?  sfd.FileName : null;
         }
     }
 }

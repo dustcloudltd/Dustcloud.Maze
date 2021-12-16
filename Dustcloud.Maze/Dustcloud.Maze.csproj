@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dustcloud.Maze.Loader\Dustcloud.Maze.Loader.csproj" />
+    <ProjectReference Include="..\Dustcloud.Maze.Loader\Dustcloud.Maze.Services.csproj" />
     <ProjectReference Include="..\Dustcloud.Maze.Model\Dustcloud.Maze.Model.csproj" />
   </ItemGroup>
 

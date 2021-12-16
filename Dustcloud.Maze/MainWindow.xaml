@@ -7,6 +7,8 @@
         xmlns:controls="clr-namespace:Dustcloud.Maze.Controls"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:converters="clr-namespace:Dustcloud.Maze.Converters"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:maze="clr-namespace:Dustcloud.Maze"
         mc:Ignorable="d"
         Title="MainWindow" Height="768" Width="800"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
@@ -70,9 +72,12 @@
                                    StartTemplate="{StaticResource StartTileTemplate}"
                                    FinishTemplate="{StaticResource FinishTileTemplate}"/>
         
-        
-
     </Window.Resources>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Closing" >
+            <b:InvokeCommandAction Command="{Binding ClosingCommand}"/>
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
     <Grid>
         <Grid.InputBindings>
             <KeyBinding Command="{Binding MoveForwardCommand}"
@@ -85,7 +90,7 @@
                         Key="Left" />
         </Grid.InputBindings>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width=".5*"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -97,8 +102,8 @@
                 <MenuItem Header="New" Command="{Binding NewFileCommand}"/>
                 <MenuItem Header="Load" Click="Button_Click"
                           Command="{Binding LoadDataCommand}" />
-                <MenuItem Header="Save As" Command="{Binding SaveAsDataCommand}"/>
-                <MenuItem Header="Quit" Command="{Binding CloseAppCommand}"/>
+                <MenuItem Header="Save As" Click="SaveAs_Click" Command="{Binding SaveAsDataCommand}"/>
+                <MenuItem Header="Quit" Click="MenuItem_OnClick" />
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1">
@@ -231,14 +236,21 @@
             <TabItem Header="Automatic">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition/>
                         <RowDefinition Height="30"/>
                         <RowDefinition/>
-                        <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Button Grid.Column="1" Content="Find Automatic Route" 
-                            Command="{Binding FindAutomaticRouteCommand}"/> 
+                    <StackPanel>
+                    <Button Content="Find All Routes" 
+                            Command="{Binding FindAutomaticRouteCommand}"/>
+                    <Button Content="Find Quickest Route" 
+                            Command="{Binding FindAutomaticRouteCommand}"
+                            CommandParameter="true"/>
                     <ProgressBar IsIndeterminate="true" 
+                                 Height="5"
                                  Visibility="{Binding IsCalculating, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
                     <ListBox ItemsSource="{Binding RoutesCollectionView}"
                               Grid.Row="1"
                               Background="Black"
@@ -256,7 +268,11 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <TextBox Grid.Row="2" Background="Black"
+                    <TextBlock Grid.Row="2"
+                               VerticalAlignment="Center"
+                               Margin="5"
+                               Text="{Binding TotalRoutesFound, StringFormat='Total Routes Found: {0}'}"></TextBlock>
+                    <TextBox Grid.Row="3" Background="Black"
                              Foreground="Aqua"
                              IsReadOnly="True"
                              Text="{Binding SelectedRoute.OrderedBreadCrumbs, Mode=OneWay, Converter={StaticResource BreadCrumbsToPlanConverter}}"/>
@@ -265,12 +281,6 @@
 
 
         </TabControl>
-        <!--<ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding KeyChain}" TextWrapping="Wrap"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>-->
-        <!--SelectedItem="{Binding SelectedTile}"-->
         <ItemsControl x:Name="UniGrid"
                       Grid.Row="1"
                       Grid.RowSpan="2"

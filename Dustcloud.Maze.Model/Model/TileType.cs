@@ -1,4 +1,4 @@
-namespace Dustcloud.Maze.Model
+namespace Dustcloud.Maze.Model.Model
 {
     public enum TileType
     {

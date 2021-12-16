@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dustcloud.IOC.Attributes;
+using Dustcloud.Maze.Model.Model;
 
-namespace Dustcloud.Maze.Model.Services
+namespace Dustcloud.Maze.Services.Services
 {
-    [DependencyConfiguration(typeof(IBoardService), typeof(BoardService), LifetimeManagerType.Singleton)]
-    internal class BoardService : IBoardService
+    [DependencyConfiguration(typeof(IHeroService), typeof(HeroService), LifetimeManagerType.Singleton)]
+    internal class HeroService : IHeroService
     {
         public IEnumerable<Tile> FindNonVisitedNeighbors(IEnumerable<Tile> board, Tile tile)
         {
@@ -60,13 +61,5 @@ namespace Dustcloud.Maze.Model.Services
             return (newX, newY);
         }
 
-    }
-
-    public interface IBoardService
-    {
-        IEnumerable<Tile> FindAllNeighbors(IEnumerable<Tile> board, Tile tile);
-        IEnumerable<Tile> FindNonVisitedNeighbors(IEnumerable<Tile> board, Tile tile);
-        bool CanMoveForward(Hero hero, IEnumerable<Tile> neighbors);
-        IEnumerable<Tile> MoveForward(List<Tile> board, Hero hero);
     }
 }

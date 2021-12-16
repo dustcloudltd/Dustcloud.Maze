@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dustcloud.IOC.Attributes;
-using Dustcloud.Maze.Model;
+using Dustcloud.Maze.Model.Model;
 
-namespace Dustcloud.Maze.Loader
+namespace Dustcloud.Maze.Services.Services
 {
-    [DependencyConfiguration(typeof(ILoaderService), typeof(LoaderService), LifetimeManagerType.Singleton)]
-    public sealed class LoaderService : ILoaderService
+    [DependencyConfiguration(typeof(IDataService), typeof(DataService), LifetimeManagerType.Singleton)]
+    public sealed class DataService : IDataService
     {
         public async Task<IEnumerable<Tile>> LoadDataFileAsync(string filePath)
         {
@@ -102,6 +102,16 @@ namespace Dustcloud.Maze.Loader
         public IEnumerable<Tile> LoadDataFromString(string mazeEdit)
         {
             return LoadData(mazeEdit.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries));
+        }
+
+        public async Task SaveAsync(string filePath, string mazeEdit)
+        {
+            if (File.Exists(filePath))
+            {
+                //too bad
+            }
+
+            await File.WriteAllTextAsync(filePath, mazeEdit);
         }
     }
 }

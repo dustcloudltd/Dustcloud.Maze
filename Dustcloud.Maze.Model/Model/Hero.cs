@@ -1,13 +1,11 @@
-using System;
-using Dustcloud.Maze.Model.Services;
-
-namespace Dustcloud.Maze.Model
+namespace Dustcloud.Maze.Model.Model
 {
     public class Hero
     {
         public Hero(Tile tile)
         {
             OccupiedTile = tile;
+            OccupiedTile.IsOccupied = true;
         }
 
         public int X

@@ -1,5 +1,6 @@
 ﻿using Dustcloud.Maze.Annotations;
 using Dustcloud.Maze.Model;
+using Dustcloud.Maze.Model.Model;
 
 namespace Dustcloud.Maze.ViewModels
 {

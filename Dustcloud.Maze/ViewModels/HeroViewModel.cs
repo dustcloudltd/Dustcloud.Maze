@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Dustcloud.IOC.Attributes;
 using Dustcloud.Maze.Model;
+using Dustcloud.Maze.Model.Model;
 using Prism.Commands;
 
 namespace Dustcloud.Maze.ViewModels
@@ -91,10 +92,20 @@ namespace Dustcloud.Maze.ViewModels
             MovementLogCollection.Add($"Hero turns {turns} and is now facing {Direction}");
         }
 
-        public void MoveForward()
+        public bool CheckHeroState()
         {
             ResetXY();
-            MovementLogCollection.Add($"Hero moves onto coordinates ({X}, {Y}) facing {Direction}");
+            if (Hero.OccupiedTile.TileType == TileType.Finish)
+            {
+                MovementLogCollection.Add(
+                    $"Hero moves onto the Finish tile at coordinates ({X}, {Y}) facing {Direction}");
+                return true;
+            }
+            else
+            {
+                MovementLogCollection.Add($"Hero lands onto an empty tile at coordinates ({X}, {Y}) facing {Direction}.");
+                return false;
+            }
         }
 
         public void ResetXY()

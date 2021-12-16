@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 using Dustcloud.Maze.Model;
+using Dustcloud.Maze.Model.Model;
 
 namespace Dustcloud.Maze.Converters
 {

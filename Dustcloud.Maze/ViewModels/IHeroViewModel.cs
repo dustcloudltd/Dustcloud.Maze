@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Dustcloud.Maze.Model;
+using Dustcloud.Maze.Model.Model;
 
 namespace Dustcloud.Maze.ViewModels
 {
@@ -22,7 +23,7 @@ namespace Dustcloud.Maze.ViewModels
         void Initialize();
         event PropertyChangedEventHandler? PropertyChanged;
         void Turn(int angle);
-        void MoveForward();
+        bool CheckHeroState();
         void ResetXY();
     }
 }
