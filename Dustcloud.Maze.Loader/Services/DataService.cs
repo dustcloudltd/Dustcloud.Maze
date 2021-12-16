@@ -9,7 +9,7 @@ using Dustcloud.Maze.Model.Model;
 namespace Dustcloud.Maze.Services.Services
 {
     [DependencyConfiguration(typeof(IDataService), typeof(DataService), LifetimeManagerType.Singleton)]
-    public sealed class DataService : IDataService
+    internal sealed class DataService : IDataService
     {
         public async Task<IEnumerable<Tile>> LoadDataFileAsync(string filePath)
         {

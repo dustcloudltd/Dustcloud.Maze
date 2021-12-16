@@ -15,7 +15,7 @@ namespace Dustcloud.Maze.Services.Services
     }
 
     [DependencyConfiguration(typeof(ISchedulerFactory), typeof(SchedulerFactory), LifetimeManagerType.Singleton)]
-    public class SchedulerFactory : ISchedulerFactory
+    internal sealed class SchedulerFactory : ISchedulerFactory
     {
         private IScheduler _dispatcher;
         public IScheduler DefaultScheduler { get; } = Scheduler.Default;

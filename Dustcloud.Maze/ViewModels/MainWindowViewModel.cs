@@ -15,11 +15,14 @@ using Prism.Commands;
 
 namespace Dustcloud.Maze.ViewModels
 {
+    /// <summary>
+    /// This is where all the fun happens.
+    /// The DependencyConfiguration attribute is of my devise - Dustcloud.IOC.Standard nuget package 
+    /// </summary>
     [DependencyConfiguration(typeof(IMainWindowViewModel), typeof(MainWindowViewModel), LifetimeManagerType.Singleton)]
     internal sealed class MainWindowViewModel : ViewModelBase, IMainWindowViewModel
     {
         private readonly IDataService _dataService;
-        private readonly IHeroService _heroService;
         private readonly IFindFinishService _findFinishService;
         private readonly ISchedulerFactory _schedulerFactory;
 
@@ -58,13 +61,11 @@ namespace Dustcloud.Maze.ViewModels
 
 
         public MainWindowViewModel(IDataService dataService,
-                                   IHeroService heroService,
                                    IFindFinishService findFinishService,
                                    ISchedulerFactory schedulerFactory,
                                    IHeroViewModel heroViewModel)
         {
             _dataService = dataService;
-            _heroService = heroService;
             _findFinishService = findFinishService;
             _schedulerFactory = schedulerFactory;
             HeroViewModel = heroViewModel;
@@ -390,7 +391,7 @@ namespace Dustcloud.Maze.ViewModels
             ResetBoard();
             HeroViewModel.Hero = new Hero(TileCollection.Single(s => s.TileType == TileType.Start).Tile);
             HeroViewModel.Initialize();
-            _neighbors = _heroService.FindNonVisitedNeighbors(TileCollection.Select(s => s.Tile), HeroViewModel.Hero.OccupiedTile);
+            _neighbors = _findFinishService.FindNonVisitedNeighbors(TileCollection.Select(s => s.Tile), HeroViewModel.Hero.OccupiedTile);
             TurnCommand.RaiseCanExecuteChanged();
             MoveForwardCommand.RaiseCanExecuteChanged();
         }
@@ -429,13 +430,13 @@ namespace Dustcloud.Maze.ViewModels
         private bool CanExecuteMoveForward()
         {
             return HeroViewModel.Hero != null &&
-                   _heroService.CanMoveForward(HeroViewModel.Hero, _neighbors);
+                   _findFinishService.CanMoveForward(HeroViewModel.Hero, _neighbors);
         }
 
 
         private void ExecuteMoveForward()
         {
-            _neighbors = _heroService.MoveForward(TileCollection.Select(s => s.Tile).ToList(), HeroViewModel.Hero);
+            _neighbors = _findFinishService.MoveForward(TileCollection.Select(s => s.Tile).ToList(), HeroViewModel.Hero);
             
             var possibleMoves = string.Join(';', _neighbors.Select(s => $"({s.X}, {s.Y})"));
             HeroViewModel.MovementLogCollection.Add($"Possible moves: {possibleMoves}");
@@ -447,7 +448,10 @@ namespace Dustcloud.Maze.ViewModels
             MoveForwardCommand.RaiseCanExecuteChanged();
             if (isFinished)
             {
-                
+                foreach (var tileVm in TileCollection.Where(s => s.Tile.HasBeenVisited))
+                {
+                    tileVm.IsLitUp = true;
+                }
             }
         }
 

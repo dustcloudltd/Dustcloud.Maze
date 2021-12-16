@@ -4,6 +4,9 @@ using Dustcloud.Maze.Model.Model;
 
 namespace Dustcloud.Maze.Services.Services
 {
+    /// <summary>
+    /// When implemented, this class serves for any data persistence operations.
+    /// </summary>
     public interface IDataService
     {
         Task<IEnumerable<Tile>> LoadDataFileAsync(string filePath);

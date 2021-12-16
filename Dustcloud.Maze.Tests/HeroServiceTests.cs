@@ -1,9 +1,12 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
 using Dustcloud.Maze.Model.Model;
 using Dustcloud.Maze.Services.Services;
+using Dustcloud.Maze.Services.Tests;
+using Moq;
 using NUnit.Framework;
 
 namespace Dustcloud.Maze.Services.Tests
@@ -18,7 +21,7 @@ namespace Dustcloud.Maze.Services.Tests
 
             var hero = new Hero(board.Single(s => s.X == x && s.Y == y)) { Direction = direction };
 
-            var service = new HeroService();
+            var service = new FindFinishService();
             var neighbors = service.FindAllNeighbors(board, hero.OccupiedTile);
             var canMoveForward = service.CanMoveForward(hero, neighbors);
 
@@ -32,7 +35,7 @@ namespace Dustcloud.Maze.Services.Tests
 
             var hero = new Hero(board.Single(s => s.TileType == TileType.Start)){Direction = Direction.East};
 
-            var service = new HeroService();
+            var service = new FindFinishService();
             var neighbors = service.MoveForward(board.ToList(), hero).ToList();
 
             Assert.NotNull(neighbors);
@@ -53,7 +56,7 @@ namespace Dustcloud.Maze.Services.Tests
             
             var occupiedTile = board.Single(x => x.X == 2 && x.Y == 1);
             occupiedTile.IsOccupied = true;
-            var service = new HeroService();
+            var service = new FindFinishService();
             var neighbors = service.FindNonVisitedNeighbors(board.ToList(), occupiedTile).ToList();
 
             Assert.NotNull(neighbors);
@@ -61,6 +64,24 @@ namespace Dustcloud.Maze.Services.Tests
             Assert.AreEqual(1, neighbors.Count);
             Assert.AreSame(neighbors.Single(x => x.X == 3 && x.Y == 1), board.Single(x => x.X == 3 && x.Y == 1));
 
+        }
+        [Test]
+        public void GivenAMockDataBoard_FindBothRoutes()
+        {
+            var board = DataMocker.GetDataBoard();
+            var startTile = board.Single(s => s.TileType == TileType.Start);
+            var originalRouteTileList = new List<Tile>();
+            originalRouteTileList.Add(startTile);
+            var originalRoute = new Route(originalRouteTileList);
+            var service = new FindFinishService();
+
+            List<Route> routes = new();
+
+            service.ObserveRoutes().Subscribe(r => routes.Add(r));
+            service.FindAllRoutes(board.ToList(), new List<Route> { originalRoute }, false);
+
+            Assert.IsNotEmpty(routes);
+            Assert.AreEqual(2, routes.Count);
         }
     }
 

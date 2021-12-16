@@ -10,15 +10,9 @@ namespace Dustcloud.Maze.Services.Services
     [DependencyConfiguration(typeof(IFindFinishService), typeof(FindFinishService), LifetimeManagerType.Singleton)]
     internal class FindFinishService : IFindFinishService
     {
-        private readonly IHeroService _heroService;
         private Subject<Route> _routeSubject = new();
         private Subject<bool> _resetSubject = new();
         private Subject<Route> _singleRouteSubject = new();
-
-        public FindFinishService(IHeroService heroService)
-        {
-            _heroService = heroService;
-        }
 
         public IObservable<Route> ObserveRoutes()
         {
@@ -35,6 +29,13 @@ namespace Dustcloud.Maze.Services.Services
             return _resetSubject;
         }
 
+        /// <summary>
+        /// One big function, fo sho.
+        /// </summary>
+        /// <param name="board">The Board</param>
+        /// <param name="routes">The routes (the starting single route with just a StartTile in)</param>
+        /// <param name="onlyFindQuickest">Self exp n'est-ce pas?</param>
+        /// <returns></returns>
         public List<Route> FindAllRoutes(List<Tile> board, List<Route> routes, bool onlyFindQuickest = false)
         {
             List<Route> toBeAdded = new();
@@ -44,7 +45,7 @@ namespace Dustcloud.Maze.Services.Services
                 var lastTile = route.OrderedBreadCrumbs.Last();
                 lastTile.HasBeenVisited = true;
                 
-                var neighbors = _heroService.FindNonVisitedNeighbors(board, lastTile).ToList();
+                var neighbors = FindNonVisitedNeighbors(board, lastTile).ToList();
                 
                 foreach (var neighbor in neighbors.ToList())
                 {
@@ -59,7 +60,24 @@ namespace Dustcloud.Maze.Services.Services
                     routes.Remove(route);
                     continue;
                 }
+                
+                foreach (var neighbor in neighbors.Where(s => s.TileType != TileType.Finish))
+                {
+                    var newList = new List<Tile> (route.OrderedBreadCrumbs);
+                    var neighborClone = neighbor.Clone() as Tile;
+                    neighborClone.HasBeenVisited = true;
+                    var newBoard = new List<Tile>(board);
+                    var index = newBoard.IndexOf(neighbor);
+                    newBoard.Remove(neighbor);
+                    newBoard.Insert(index, neighborClone);
+                    newList.Add(neighborClone);
+                    
+                    var newRoute = new Route(newList);
+                    toBeAdded.Add(newRoute);
+                }
 
+                //This could be optimized better-- 
+                //Something to talk about
                 var finishTile = neighbors.SingleOrDefault(s => s.TileType == TileType.Finish);
                 if (finishTile != null)
                 {
@@ -77,25 +95,9 @@ namespace Dustcloud.Maze.Services.Services
                     routes.Remove(route);
                     continue;
                 }
-
-                foreach (var neighbor in neighbors)
-                {
-                    var newList = new List<Tile> (route.OrderedBreadCrumbs);
-                    var neighborClone = neighbor.Clone() as Tile;
-                    neighborClone.HasBeenVisited = true;
-                    var newBoard = new List<Tile>(board);
-                    var index = newBoard.IndexOf(neighbor);
-                    newBoard.Remove(neighbor);
-                    newBoard.Insert(index, neighborClone);
-                    newList.Add(neighborClone);
-                    
-                    var newRoute = new Route(newList);
-                    toBeAdded.Add(newRoute);
-                }
                 routes.Remove(route);
-
             }
-            
+
             var routesDictionary = routes.ToDictionary(s => s.KeyChain);
             foreach (var add in toBeAdded)
             {
@@ -116,5 +118,58 @@ namespace Dustcloud.Maze.Services.Services
                 return routes;
             }
         }
+
+        public IEnumerable<Tile> FindNonVisitedNeighbors(IEnumerable<Tile> board, Tile tile)
+        {
+            return board.Where(s => s.CanBeSteppedOver &&
+                                    ((s.X - 1 == tile.X && s.Y == tile.Y) ||
+                                     (s.X + 1 == tile.X && s.Y == tile.Y) ||
+                                     (s.X == tile.X && s.Y - 1 == tile.Y) ||
+                                     (s.X == tile.X && s.Y + 1 == tile.Y)) &&
+                                     !s.HasBeenVisited)
+                .ToList();
+        }
+
+        public IEnumerable<Tile> FindAllNeighbors(IEnumerable<Tile> board, Tile tile)
+        {
+            return board.Where(s => s.CanBeSteppedOver &&
+                                    ((s.X - 1 == tile.X && s.Y == tile.Y) ||
+                                     (s.X + 1 == tile.X && s.Y == tile.Y) ||
+                                     (s.X == tile.X && s.Y - 1 == tile.Y) ||
+                                     (s.X == tile.X && s.Y + 1 == tile.Y)));
+        }
+
+
+        public bool CanMoveForward(Hero hero, IEnumerable<Tile> neighbors)
+        {
+            var (newPositionX, newPositionY) = CalculateForwardPosition(hero.X, hero.Y, hero.Direction);
+            var newTile = neighbors.SingleOrDefault(s => s.X == newPositionX &&
+                                                         s.Y == newPositionY &&
+                                                         s.TileType != TileType.Wall);
+            return newTile != null;
+        }
+
+        public IEnumerable<Tile> MoveForward(List<Tile> board, Hero hero)
+        {
+            var (newPositionX, newPositionY) = CalculateForwardPosition(hero.X, hero.Y, hero.Direction);
+            hero.OccupiedTile.IsOccupied = false;
+            var occupiedTile = board.Single(s => s.X == newPositionX && s.Y == newPositionY);
+            occupiedTile.IsOccupied = true;
+            hero.OccupiedTile = occupiedTile;
+
+            return FindAllNeighbors(board, hero.OccupiedTile);
+        }
+
+        private (int, int) CalculateForwardPosition(int x, int y, Direction direction)
+        {
+            double newPositionX = x;
+            double newPositionY = y;
+            newPositionX += Math.Round(Math.Sin(Math.PI * Convert.ToDouble(direction) / 180.0), 0);
+            newPositionY += -Math.Round(Math.Cos(Math.PI * Convert.ToDouble(direction) / 180.0), 0);
+            var newX = Convert.ToInt32(newPositionX);
+            var newY = Convert.ToInt32(newPositionY);
+            return (newX, newY);
+        }
+
     }
 }

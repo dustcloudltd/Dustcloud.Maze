@@ -60,7 +60,6 @@ namespace Dustcloud.Maze.Tests
     internal class MainWindowViewModelBuilder
     {
         private IDataService _dataService;
-        private IHeroService _heroService;
         private IFindFinishService _findFinishService;
         private IHeroViewModel _heroViewModel;
         private ISchedulerFactory _schedulerFactory;
@@ -68,7 +67,6 @@ namespace Dustcloud.Maze.Tests
         public MainWindowViewModel Build()
         {
             return new MainWindowViewModel(_dataService ?? Mock.Of<IDataService>(),
-                _heroService ?? Mock.Of<IHeroService>(),
                 _findFinishService ?? Mock.Of<FindFinishService>(),
                 _schedulerFactory ?? Mock.Of<ISchedulerFactory>(),
                 _heroViewModel ?? Mock.Of<IHeroViewModel>());
@@ -88,12 +86,6 @@ namespace Dustcloud.Maze.Tests
         public MainWindowViewModelBuilder With(IFindFinishService value)
         {
             _findFinishService = value;
-            return this;
-        }
-
-        public MainWindowViewModelBuilder With(IHeroService value)
-        {
-            _heroService = value;
             return this;
         }
 
