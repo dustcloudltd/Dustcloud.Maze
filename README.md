@@ -4,13 +4,13 @@ InfoSys Interview Project
 ### Foreword
 Dear InfoSys people,  
 ~~<strike>First of all, I'd like to apologize for the fact I have used .NET 6 (and not 5, as specified) - I was a little bit too deep into the project when I realized that little oversight.</strike>~~
-(__NB: As of 16/12 7PM the app has now been downgraded to run on .NET 5. If you wish to see code differences between .NET 5 and 6, please check the GIT repository tree_)
+(_NB: As of 16/12 7PM the app has now been downgraded to run on .NET 5. If you wish to see code differences between .NET 5 and 6, please check the GIT repository tree_)
   
 (Oh, also, please don't mind the 'z's in my verbs, when you hear me you'll know why).  
 This has been a really cool project, I must say, this form of interviewing is by far the best. Not only does it showcase my abilities, but also allows me to do some research and teach me stuff along the way
 (which I believe is what it's all about in life - constant education).  
 It may have taken me a little bit over the **two** hours originally assigned, but I did it with pleasure (and I hope you don't mind me being a little bit more thorough, but once 
-I dived into it, it was hard to just leave it--  
+I dived into it, it was hard to just leave it--  Meaning, I did not want to finish at 2 hours, instead I wanted to give you a fully functioning app.
 
 So, without further ado, here it is...
 
