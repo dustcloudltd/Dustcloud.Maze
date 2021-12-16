@@ -35,7 +35,7 @@ namespace Dustcloud.Maze.Services.Services
         /// <param name="board">The Board</param>
         /// <param name="routes">The routes (the starting single route with just a StartTile in)</param>
         /// <param name="onlyFindQuickest">Self exp n'est-ce pas?</param>
-        /// <returns></returns>
+        /// <returns>Doesn't matter</returns>
         public List<Route> FindAllRoutes(List<Tile> board, List<Route> routes, bool onlyFindQuickest = false)
         {
             List<Route> toBeAdded = new();
@@ -94,6 +94,8 @@ namespace Dustcloud.Maze.Services.Services
                     _routeSubject.OnNext(route);
                     routes.Remove(route);
                     continue;
+
+                    //need some sort of counter here to ask every 10k times whether or not to continue, otherwise will get OutOfMemoryException after around 400k records on 16gig system
                 }
                 routes.Remove(route);
             }
@@ -121,16 +123,11 @@ namespace Dustcloud.Maze.Services.Services
 
         public IEnumerable<Tile> FindNonVisitedNeighbors(IEnumerable<Tile> board, Tile tile)
         {
-            return board.Where(s => s.CanBeSteppedOver &&
-                                    ((s.X - 1 == tile.X && s.Y == tile.Y) ||
-                                     (s.X + 1 == tile.X && s.Y == tile.Y) ||
-                                     (s.X == tile.X && s.Y - 1 == tile.Y) ||
-                                     (s.X == tile.X && s.Y + 1 == tile.Y)) &&
-                                     !s.HasBeenVisited)
-                .ToList();
+            return FindAllNeighbors(board, tile).Where(s => !s.HasBeenVisited)
+                                                .ToList();
         }
 
-        public IEnumerable<Tile> FindAllNeighbors(IEnumerable<Tile> board, Tile tile)
+        private IEnumerable<Tile> FindAllNeighbors(IEnumerable<Tile> board, Tile tile)
         {
             return board.Where(s => s.CanBeSteppedOver &&
                                     ((s.X - 1 == tile.X && s.Y == tile.Y) ||

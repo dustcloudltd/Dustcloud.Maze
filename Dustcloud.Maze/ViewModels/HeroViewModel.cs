@@ -130,7 +130,6 @@ namespace Dustcloud.Maze.ViewModels
         public void Dispose()
         {
             MovementLogCollection.CollectionChanged -= MovementLogOnCollectionChanged;
-            Hero.OccupiedTile = null;
             Hero = null;
         }
     }

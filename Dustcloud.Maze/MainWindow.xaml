@@ -71,7 +71,8 @@
                                    WallTemplate="{StaticResource WallTemplate}"
                                    StartTemplate="{StaticResource StartTileTemplate}"
                                    FinishTemplate="{StaticResource FinishTileTemplate}"/>
-        
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+
     </Window.Resources>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Closing" >
@@ -96,6 +97,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"
+                           MaxHeight="40"/>
+
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Grid.ColumnSpan="2">
             <MenuItem Header="File">
@@ -104,6 +108,12 @@
                           Command="{Binding LoadDataCommand}" />
                 <MenuItem Header="Save As" Click="SaveAs_Click" Command="{Binding SaveAsDataCommand}"/>
                 <MenuItem Header="Quit" Click="MenuItem_OnClick" />
+            </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="About" 
+                          Click="About_Click"/>
+                <MenuItem Header="Documentation"
+                          Click="Doc_OnClick"/>
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1">
@@ -129,6 +139,7 @@
                             <Button Content="Validate and parse"
                                     Grid.Row="1"
                                     Command="{Binding ValidateAndParseDataCommand}"/>
+                            
                         </Grid>
                     </GroupBox>
                     <GroupBox Header="Data">
@@ -236,15 +247,27 @@
             <TabItem Header="Automatic">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="70"/>
                         <RowDefinition/>
                         <RowDefinition Height="30"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <StackPanel>
-                    <Button Content="Find All Routes" 
-                            Command="{Binding FindAutomaticRouteCommand}"/>
-                    <Button Content="Find Quickest Route" 
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Content="Find All Routes" 
+                                    Command="{Binding FindAutomaticRouteCommand}"/>
+                            <Button Content="Stop" 
+                                    Grid.Column="1"
+                                    Width="100"
+                                    Visibility="{Binding IsCalculating, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Command="{Binding StopAutomaticRouteCommand}"/>
+                        </Grid>
+                        
+                        <Button Content="Find Quickest Route" 
                             Command="{Binding FindAutomaticRouteCommand}"
                             CommandParameter="true"/>
                     <ProgressBar IsIndeterminate="true" 
@@ -255,6 +278,12 @@
                               Grid.Row="1"
                               Background="Black"
                               SelectedItem="{Binding SelectedRoute}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel Orientation="Vertical"
+                                                        VirtualizationMode="Recycling"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -380,9 +409,15 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
-        
+        <Grid Grid.Row="2"
+              VerticalAlignment="Stretch"
+              Visibility="{Binding Errors, Converter={StaticResource NullToVisibilityConverter}}"
+              Background="Black">
+            <TextBlock Text="{Binding Errors, Mode=OneWay}"
+                       VerticalAlignment="Stretch"
+                       Foreground="Red"/>
+        </Grid>
     </Grid>
-
 </Window>
 
     

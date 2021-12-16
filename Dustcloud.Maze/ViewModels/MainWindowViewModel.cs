@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -51,6 +53,7 @@ namespace Dustcloud.Maze.ViewModels
         private bool _isNewFile;
         private ICommand _saveAsDataCommand;
         private int _totalRoutesFound;
+        private string _errors;
 
         public ObservableCollection<TileViewModel> TileCollection { get; } = new();
         public ObservableCollection<Route> Routes { get; } = new();
@@ -89,11 +92,11 @@ namespace Dustcloud.Maze.ViewModels
 
         private void SubscribeObservables()
         {
-            Disposables.Add(_findFinishService.ObserveRoutes()
+            _findFinishService.ObserveRoutes()
+                .Take(10000)
                 .SubscribeOn(_schedulerFactory.DefaultScheduler)
                 .ObserveOn(_schedulerFactory.Dispatcher)
-                .Subscribe(AddRoute, OnError));
-
+                .Subscribe(AddRoute, OnError);
             Disposables.Add(_findFinishService.ObserveSingleRoute()
                 .Take(2)
                 .SubscribeOn(_schedulerFactory.DefaultScheduler)
@@ -117,6 +120,7 @@ namespace Dustcloud.Maze.ViewModels
         {
             Routes.Add(route);
             TotalRoutesFound++;
+            OnResetReceived(TotalRoutesFound >= 10000);
         }
 
         private void OnResetReceived(bool isReset)
@@ -125,7 +129,6 @@ namespace Dustcloud.Maze.ViewModels
             {
                 IsCalculating = false;
                 FindAutomaticRouteCommand.RaiseCanExecuteChanged();
-                return;
             }
         }
 
@@ -483,15 +486,37 @@ namespace Dustcloud.Maze.ViewModels
             {
                 return;
             }
-
+            Errors = string.Empty;
             TileCollection.Clear();
             HeroViewModel.Hero = null;
+            try
+            {
+                var tiles = await _dataService.LoadDataFileAsync(FilePath);
 
-            var tiles = await _dataService.LoadDataFileAsync(FilePath);
-           
-            CreateTileCollection(tiles);
-            IsNewFile = false;
-            IsFileLoaded = true;
+                CreateTileCollection(tiles);
+                IsNewFile = false;
+                IsFileLoaded = true;
+            }
+            catch (AggregateException ex)
+            {
+                Errors = string.Join(Environment.NewLine, ex.InnerExceptions.SelectMany(s => s.Message));
+
+            }
+            catch (InvalidDataException ex)
+            {
+                Errors = ex.Message;
+            }
+        }
+
+        public string Errors
+        {
+            get => _errors;
+            set
+            {
+                if (value == _errors) return;
+                _errors = value;
+                OnPropertyChanged(nameof(Errors));
+            }
         }
 
         private void CreateTileCollection(IEnumerable<Tile> tiles)
@@ -527,6 +552,7 @@ namespace Dustcloud.Maze.ViewModels
             Routes.Clear();
             IsCalculating = true;
             FindAutomaticRouteCommand.RaiseCanExecuteChanged();
+
             Task.Run(() =>
             {
                 _findFinishService.FindAllRoutes(TileCollection.Select(s => s.Tile).ToList(),
@@ -542,8 +568,21 @@ namespace Dustcloud.Maze.ViewModels
 
         private void ExecuteValidateAndParseData()
         {
-            var tiles = _dataService.LoadDataFromString(MazeEdit);
-            CreateTileCollection(tiles);
+            Errors = string.Empty;
+            try
+            {
+                var tiles = _dataService.LoadDataFromString(MazeEdit);
+                CreateTileCollection(tiles);
+            }
+            catch (AggregateException ex)
+            {
+                Errors = string.Join(Environment.NewLine, ex.InnerExceptions.SelectMany(s => s.Message));
+
+            }
+            catch (InvalidDataException ex)
+            {
+                Errors += Environment.NewLine + ex.Message;
+            }
         }
 
         private bool CanExecuteValidateAndParseData()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -40,6 +41,17 @@ namespace Dustcloud.Maze
         {
             var sfd = new SaveFileDialog();
             FilePathTextBox.Text = sfd.ShowDialog() == true ?  sfd.FileName : null;
+        }
+
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(this, $"aMaze-o by Greg Chelstowski, 14-16/12/2021{Environment.NewLine} ;)", "About", MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+
+        private void Doc_OnClick(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo{FileName = "https://github.com/dustcloudltd/Dustcloud.Maze/#readme",UseShellExecute = true});
         }
     }
 }
