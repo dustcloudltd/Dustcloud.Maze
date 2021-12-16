@@ -1,13 +1,5 @@
-﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using Dustcloud.Maze.Model;
 using Dustcloud.Maze.Model.Model;
 using Dustcloud.Maze.ViewModels;
 

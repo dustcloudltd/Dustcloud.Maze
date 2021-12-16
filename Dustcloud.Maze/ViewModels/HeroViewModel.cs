@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using Dustcloud.IOC.Attributes;
 using Dustcloud.Maze.Model;
 using Dustcloud.Maze.Model.Model;
@@ -12,6 +13,7 @@ namespace Dustcloud.Maze.ViewModels
     [DependencyConfiguration(typeof(IHeroViewModel), typeof(HeroViewModel), LifetimeManagerType.Transient)]
     internal class HeroViewModel : ViewModelBase, IHeroViewModel
     {
+        [AllowNull]
         public Hero Hero { get; set; }
         private ObservableCollection<string> _movementLogCollection = new();
 
@@ -128,6 +130,8 @@ namespace Dustcloud.Maze.ViewModels
         public void Dispose()
         {
             MovementLogCollection.CollectionChanged -= MovementLogOnCollectionChanged;
+            Hero.OccupiedTile = null;
+            Hero = null;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using Dustcloud.IOC.Attributes;
 
 namespace Dustcloud.Maze.Services.Services
@@ -26,7 +27,7 @@ namespace Dustcloud.Maze.Services.Services
             {
                 if (_dispatcher == null)
                 {
-                    _dispatcher = new DispatcherScheduler(System.Windows.Threading.Dispatcher.CurrentDispatcher);
+                    _dispatcher = new SynchronizationContextScheduler(new DispatcherSynchronizationContext(System.Windows.Threading.Dispatcher.CurrentDispatcher));
                 }
 
                 return _dispatcher;
