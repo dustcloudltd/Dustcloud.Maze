@@ -10,7 +10,7 @@
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:maze="clr-namespace:Dustcloud.Maze"
         mc:Ignorable="d"
-        Title="MainWindow" Height="768" Width="800"
+        Title="Dustcloud aMaze-o" Height="768" Width="800"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
