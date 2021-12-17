@@ -22,7 +22,7 @@ namespace Dustcloud.Maze.Services.Tests
             var hero = new Hero(board.Single(s => s.X == x && s.Y == y)) { Direction = direction };
 
             var service = new FindFinishService();
-            var neighbors = service.FindAllNeighbors(board, hero.OccupiedTile);
+            var neighbors = service.FindNonVisitedNeighbors(board, hero.OccupiedTile);
             var canMoveForward = service.CanMoveForward(hero, neighbors);
 
             return canMoveForward;

@@ -260,12 +260,11 @@
                             </Grid.ColumnDefinitions>
                             <Button Content="Find All Routes" 
                                     Command="{Binding FindAutomaticRouteCommand}"/>
-                            <Button Content="Stop" 
+                            <!--<Button Content="Stop" 
                                     Grid.Column="1"
                                     Width="100"
                                     Visibility="{Binding IsCalculating, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                    Command="{Binding StopAutomaticRouteCommand}"/>
-                        </Grid>
+                                    Command="{Binding StopAutomaticRouteCommand}"/>-->                        </Grid>
                         
                         <Button Content="Find Quickest Route" 
                             Command="{Binding FindAutomaticRouteCommand}"
