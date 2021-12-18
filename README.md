@@ -26,13 +26,13 @@ Once loaded (or parsed), the application will tell you how many walls and how ma
 (_NB: Same can be accomplished by simply clicking on a tile on the right hand side_)
     
 ### Manual Tab
-Once data is loaded, the Manual tab will allow you to "Drop" an explorer onto the board (the Explorer/Hero always drops onto the Start tile - **(US 2, AC1)**). The Explorer Data groupbox shows you all of the info about your Explorer (Current position and Facing Direction). 
+Once the data is loaded (or parsed), the Manual tab will allow you to "Drop" an explorer onto the board (the Explorer/Hero always drops onto the Start tile - **(US 2, AC1)**). The Explorer Data groupbox shows you all of the info about your Explorer (Current position and Facing Direction). 
 Using the arrow buttons, you can steer your explorer (an arrow) on the board (__NB: You can also use the keyboard cursors__). Every move is logged onto the movement console on the bottom left, as well as showing any possible moves **(UC2, AC2)**.  
 Once your explorer reaches the "Exit", the board also lights up the tiles that the explorer has visited (using a blinking Exclamation point) 
 
 ### Automatic Tab
 _(NB: Now, this was the funnest part, for sure, and took me the longest, which I am not ashamed to admit.)_
-Once the date is loaded (or parsed), this tab will allow you to either find all of the possible combinations (routes) to get from Start to Exit (without stepping on the same tile twice), or helps you find the quickest route.
+Once the data is loaded (or parsed), this tab will allow you to either find all of the possible combinations (routes) to get from Start to Exit (without stepping on the same tile twice), or helps you find the quickest route.
 When either of the buttons clicked the data loads (asynchronously (_NB: which can really be only shown on bigger mazes, please use MashMaze.txt - there are 8400 combinations to solve it_)). The loaded data tells you how many moves it took
 and clicking on the item (in the upper control) then displays the route history in the bottom control, as well as - you've guessed it, lights it up on the control on the right hand side (using the same exclamation point as before).
 
