@@ -12,8 +12,7 @@ namespace Dustcloud.Maze
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            var assemblies = App.ResourceAssembly.GetReferencedAssemblies().Union(new[] { App.ResourceAssembly.GetName() }).ToArray();
-            var resolver = DependencyInitializer.Initialize(assemblies);
+            var resolver = DependencyInitializer.Initialize();
 
             this.MainWindow = new MainWindow(){ DataContext = resolver.Resolve<IMainWindowViewModel>() };
             this.MainWindow.Show();

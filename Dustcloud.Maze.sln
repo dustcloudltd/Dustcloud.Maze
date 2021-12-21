@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dustcloud.Maze.Services", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3AE7807A-3CA2-4979-B317-6885EE1CC749}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dustcloud.Maze.Tests", "Dustcloud.Maze.Tests\Dustcloud.Maze.Tests.csproj", "{5ADC8211-1312-47F0-A7D3-099961C9B2D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dustcloud.Maze.Tests", "Dustcloud.Maze.Tests\Dustcloud.Maze.Tests.csproj", "{5ADC8211-1312-47F0-A7D3-099961C9B2D9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dustcloud.IOC", "..\dustcloudltd\Dustcloud.IOC\Dustcloud.IOC\Dustcloud.IOC.csproj", "{DAB0B2B8-B317-4CF0-ACD8-32BE8E90DA4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{5ADC8211-1312-47F0-A7D3-099961C9B2D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5ADC8211-1312-47F0-A7D3-099961C9B2D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5ADC8211-1312-47F0-A7D3-099961C9B2D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAB0B2B8-B317-4CF0-ACD8-32BE8E90DA4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAB0B2B8-B317-4CF0-ACD8-32BE8E90DA4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAB0B2B8-B317-4CF0-ACD8-32BE8E90DA4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAB0B2B8-B317-4CF0-ACD8-32BE8E90DA4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
