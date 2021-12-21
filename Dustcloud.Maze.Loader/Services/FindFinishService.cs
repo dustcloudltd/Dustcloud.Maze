@@ -8,7 +8,7 @@ using Dustcloud.Maze.Model.Model;
 namespace Dustcloud.Maze.Services.Services
 {
     [DependencyConfiguration(typeof(IFindFinishService), typeof(FindFinishService), LifetimeManagerType.Singleton)]
-    internal class FindFinishService : IFindFinishService
+    internal sealed class FindFinishService : IFindFinishService
     {
         private Subject<Route> _routeSubject = new();
         private Subject<bool> _resetSubject = new();
