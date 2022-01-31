@@ -1,16 +1,56 @@
 # Dustcloud.Maze
-InfoSys Interview Project
 
 ### Foreword
-Dear InfoSys people,  
-~~<strike>First of all, I'd like to apologize for the fact I have used .NET 6 (and not 5, as specified) - I was a little bit too deep into the project when I realized that little oversight.</strike>~~
-(_NB: As of 16/12 7PM the app has now been downgraded to run on .NET 5. If you wish to see code differences between .NET 5 and 6, please check the GIT repository tree_)
-  
-(Oh, also, please don't mind the 'z's in my verbs, when you hear me you'll know why).  
-This has been a really cool project, I must say, this form of interviewing is by far the best. Not only does it showcase my abilities, but also allows me to do some research and teach me stuff along the way
-(which I believe is what it's all about in life - constant education).  
-It may have taken me a little bit over the **two** hours, that the email said were originally assigned for this project.  
-So, without further ado, here it is...
+This project came to existence as a technical test from a company called INFOSYS.
+Please, judge for yourself whether their one-line assessment of my work was indeed accurate.
+
+### The requirements
+#### Maze Test
+
+=========
+
+This coding example will form the basis of your interview with the customer , you should be ready to explain any and all of the choices you have made when writing the solution.
+There is no stated time limit but we would not envisage it would take longer than a couple of hours.
+The solution must be developed with c# WPF .net 5 which is representative of what you would produce 'on the job', by that we mean it must be clear, maintainable, demonstrably bug-free and tested.  
+
+The test is based on exploring any arbitrary maze (one is provided).
+
+##### User Story 1
+------------
+As a world famous explorer of Mazes I would like a maze to exist so that I can explore it
+Acceptance Criteria:
+* A Maze (as illustrated in ExampleMaze.txt) consists of walls 'X', Empty spaces ' ', one and only one Start point 'S' and one and only one exit 'F'.
+* After a maze has been created the number of walls and empty spaces should be available to me.
+* After a maze has been created I should be able to put in a coordinate and know what exists at that point.
+
+##### User Story 2
+------------
+
+As a world famous explorer of Mazes I would like to exist in a maze and be able to navigate it so that I can explore it
+Acceptance Criteria:  
+* Given a maze the explorer should be able to drop in to the Start point.  
+
+ 
+
+* An explorer in a maze must be able to:
+
+    Move forward;  
+
+    Turn left and right;  
+
+    Understand what is in front of them;  
+
+    Understand all movement options from their given location;  
+
+    Have a record of where they have been.  
+
+UserStory 3
+-----------              
+
+* An explorer must be able to automatically explore a maze and find the exit, and on exit they must be able to state the route they took in an understandable fashion.
+
+
+# The solution
 
 ## The application
 The application consists of only one main window.  
