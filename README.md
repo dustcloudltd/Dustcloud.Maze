@@ -2,7 +2,12 @@
 
 ### Foreword
 This project came to existence as a technical test from a company called INFOSYS.
-Please, judge for yourself whether their one-line assessment of my work was indeed accurate.
+Please, judge for yourself whether their one-line assessment of my work was indeed accurate.  
+I would also like to point out the incompetence of the recruiter, IDC Technologies, who, first after a long radio silence, then asked me to do the test in one evening, after which I had to wait A MONTH for the assessment, which was half-assed at best.  
+
+Easily, the worst interview-that-never-happened ever.  
+So, a big FU to INFOSYS and IDC Technologies for wasting MY time and feeling great about it.
+Jerks.  
 
 ### The requirements
 #### Maze Test
@@ -117,7 +122,7 @@ I have managed to write tests only for the services, and a complicated one for t
 Well, there you have it folks! Hope you've enjoyed my work and I'm looking forward to hearing from you.  
   
 Kind regards,  
-Greg Chelstowski
+Dustcloud
 
 
 
